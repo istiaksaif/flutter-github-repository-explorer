@@ -11,7 +11,7 @@ class AppPages {
   static final pages = <GetPage>[
     GetPage(
       name: AppRoutes.home,
-      page: () => const RepositoryListPage(),
+      page: () => RepositoryListPage(),
       binding: RepositoryListBinding(),
     ),
     GetPage(
