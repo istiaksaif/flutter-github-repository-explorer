@@ -8,6 +8,7 @@ Feature-first Clean Architecture Flutter app that searches GitHub for the top st
 - GetX for state, DI, routing; ScreenUtil for responsive sizing; pull-to-refresh + infinite scroll pagination.
 - Cached owner avatars with `cached_network_image` + custom cache manager.
 - Light/dark themes with custom palette and typography; UI-safe text scaling locked at 1.0.
+- Repo details show stars/forks/watchers/issues, license, homepage, topics, and hero avatar.
 - Pure Dart domain layer (no Flutter imports) with feature-first Clean Architecture.
 
 ## Tech Stack
@@ -42,8 +43,8 @@ lib/
 
 ## Data Flow
 1) `GithubRemoteDataSource` -> GitHub Search API (`Flutter`, stars desc, per_page=50) via `ApiClient`.
-2) `GithubRepositoryImpl` caches into SQLite via `GithubLocalDataSource`.
-3) Offline/failed fetch falls back to cached rows.
+2) `GithubRepositoryImpl` caches into SQLite via `GithubLocalDataSource`; last-sync persisted in GetStorage.
+3) Offline/failed fetch falls back to cached rows; cache reused if last sync < 24h unless force refresh.
 4) Sorting is applied in `GetRepositoriesUseCase`, saved/loaded with `SortPreferenceRepository` (GetStorage).
 5) UI consumes GetX controllers; navigation via named routes only.
 6) Pagination: controllers maintain visible list and load more on scroll end; pull-to-refresh reloads from API/cache.
@@ -61,4 +62,5 @@ lib/
 - Responsive sizing uses `.w`, `.h`, `.sp` via ScreenUtil (`designSize` 375x812).
 - Text scaling clamped to 1.0 in `main.dart` for consistent layout.
 - Offline banner appears when no connectivity is detected.
-- Loading states use skeleton cards aligned to live card layout; avatars are cached; hero animations between list/detail.```
+- Loading states use skeleton cards aligned to live card layout; avatars are cached; hero animations between list/detail.
+- SQLite schema includes forks/watchers/issues/topics/license/homepage for richer detail view.```
