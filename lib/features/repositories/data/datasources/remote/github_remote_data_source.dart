@@ -1,41 +1,43 @@
 import 'dart:convert';
 
-import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart';
 
 import '../../models/repository_model.dart';
 import '../../../../../core/constants/api_constants.dart';
+import '../../../../../core/services/api_client.dart';
 
 abstract class GithubRemoteDataSource {
   Future<List<RepositoryModel>> fetchRepositories();
 }
 
 class GithubRemoteDataSourceImpl implements GithubRemoteDataSource {
-  GithubRemoteDataSourceImpl(this.client);
+  GithubRemoteDataSourceImpl(this.apiClient);
 
-  final http.Client client;
+  final ApiClient apiClient;
 
   @override
   Future<List<RepositoryModel>> fetchRepositories() async {
-    final uri =
-        Uri.parse(
-          '${ApiConstants.baseUrl}${ApiConstants.searchRepositories}',
-        ).replace(
-          queryParameters: {
-            'q': ApiConstants.defaultQuery,
-            'sort': 'stars',
-            'order': 'desc',
-            'per_page': ApiConstants.maxItems.toString(),
-          },
-        );
-    final response = await client.get(uri);
+    final response = await apiClient.getData(
+      path: ApiConstants.searchRepositories,
+      queryParameters: {
+        'q': ApiConstants.defaultQuery,
+        'sort': 'stars',
+        'order': 'desc',
+        'per_page': ApiConstants.maxItems.toString(),
+      },
+    );
 
     if (response.statusCode == 200) {
-      final data = json.decode(response.body) as Map<String, dynamic>;
-      final items = (data['items'] as List<dynamic>? ?? [])
-          .cast<Map<String, dynamic>>();
-      return items.map(RepositoryModel.fromJson).toList();
+      return compute(_parseRepositories, response.body);
     }
 
     throw Exception('Failed to fetch repositories (${response.statusCode})');
   }
+}
+
+List<RepositoryModel> _parseRepositories(String body) {
+  final data = json.decode(body) as Map<String, dynamic>;
+  final items = (data['items'] as List<dynamic>? ?? [])
+      .cast<Map<String, dynamic>>();
+  return items.map(RepositoryModel.fromJson).toList();
 }

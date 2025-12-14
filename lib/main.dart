@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
+import 'core/bindings/initial_binding.dart';
 import 'routes/app_pages.dart';
 import 'routes/app_routes.dart';
 
@@ -29,6 +30,7 @@ class GithubExplorerApp extends StatelessWidget {
             debugShowCheckedModeBanner: false,
             initialRoute: AppRoutes.home,
             getPages: AppPages.pages,
+            initialBinding: InitialBinding(),
             theme: ThemeData(
               colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
               useMaterial3: true,
