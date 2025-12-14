@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../core/utils/app_failure.dart';
@@ -21,6 +22,7 @@ class RepositoryListController extends GetxController {
   final LoadSortPreferenceUseCase loadSortPreferenceUseCase;
   final NetworkInfo networkInfo;
 
+  final scrollController = ScrollController();
   final repositories = <RepositoryEntity>[].obs;
   final visibleRepositories = <RepositoryEntity>[].obs;
   final isLoading = false.obs;
@@ -38,6 +40,7 @@ class RepositoryListController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    scrollController.addListener(_handleScroll);
     loadRepositories();
   }
 
@@ -113,5 +116,19 @@ class RepositoryListController extends GetxController {
       _appendPage();
       isPaginating.value = false;
     }
+  }
+
+  void _handleScroll() {
+    if (!scrollController.hasClients) return;
+    final position = scrollController.position;
+    if (position.pixels >= position.maxScrollExtent - 200) {
+      loadMoreIfNeeded(visibleRepositories.length);
+    }
+  }
+
+  @override
+  void onClose() {
+    scrollController.dispose();
+    super.onClose();
   }
 }

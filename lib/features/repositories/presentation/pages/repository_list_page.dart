@@ -107,7 +107,7 @@ class RepositoryListPage extends GetView<RepositoryListController> {
                   child: controller.offlineMode.value
                       ? Container(
                           key: const ValueKey('offline_banner'),
-                          width: double.infinity,
+                          width: 1.sw,
                           padding: EdgeInsets.symmetric(
                             horizontal: 12.w,
                             vertical: 10.h,
@@ -135,6 +135,7 @@ class RepositoryListPage extends GetView<RepositoryListController> {
                   child: AnimatedSwitcher(
                     duration: const Duration(milliseconds: 250),
                     child: ListView.separated(
+                      controller: controller.scrollController,
                       key: ValueKey(
                         '${controller.sortPreference.value.field}_${controller.sortPreference.value.order}_${controller.repositories.length}',
                       ),
@@ -142,7 +143,6 @@ class RepositoryListPage extends GetView<RepositoryListController> {
                       separatorBuilder: (context, index) =>
                           SizedBox(height: 10.h),
                       itemBuilder: (context, index) {
-                        controller.loadMoreIfNeeded(index);
                         final repo = controller.visibleRepositories[index];
                         return RepositoryTile(repository: repo);
                       },
