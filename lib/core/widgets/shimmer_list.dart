@@ -17,7 +17,7 @@ class ShimmerList extends StatelessWidget {
         itemBuilder: (context, index) => Container(
           padding: EdgeInsets.all(14.w),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(12.r),
           ),
           child: Column(
