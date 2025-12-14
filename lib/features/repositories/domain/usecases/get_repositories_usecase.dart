@@ -7,8 +7,13 @@ class GetRepositoriesUseCase {
 
   final GithubRepository repository;
 
-  Future<List<RepositoryEntity>> call(SortPreference preference) async {
-    final repos = await repository.fetchRepositories();
+  Future<List<RepositoryEntity>> call(
+    SortPreference preference, {
+    bool forceRefresh = false,
+  }) async {
+    final repos = await repository.fetchRepositories(
+      forceRefresh: forceRefresh,
+    );
     repos.sort((a, b) {
       int comparison;
       switch (preference.field) {

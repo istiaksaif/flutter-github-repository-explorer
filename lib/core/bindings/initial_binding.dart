@@ -39,6 +39,7 @@ class InitialBinding extends Bindings {
         remoteDataSource: Get.find(),
         localDataSource: Get.find(),
         networkInfo: Get.find(),
+        storage: Get.find(),
       ),
       permanent: true,
     );

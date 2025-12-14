@@ -75,6 +75,49 @@ class RepositoryDetailsPage extends GetView<RepositoryDetailsController> {
                   ],
                 ),
                 SizedBox(height: 18.h),
+                Wrap(
+                  spacing: 8.w,
+                  runSpacing: 8.h,
+                  children: [
+                    _InfoChip(
+                      icon: Icons.star,
+                      label: '${repo.stargazersCount} stars',
+                      color: Colors.amber,
+                    ),
+                    _InfoChip(
+                      icon: Icons.call_split,
+                      label: '${repo.forksCount} forks',
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    _InfoChip(
+                      icon: Icons.visibility,
+                      label: '${repo.watchersCount} watchers',
+                      color: Theme.of(context).colorScheme.secondary,
+                    ),
+                    _InfoChip(
+                      icon: Icons.bug_report_outlined,
+                      label: '${repo.openIssuesCount} open issues',
+                      color: Colors.redAccent,
+                    ),
+                  ],
+                ),
+                SizedBox(height: 14.h),
+                if (repo.licenseName.isNotEmpty)
+                  Text(
+                    'License: ${repo.licenseName}',
+                    style: TextStyle(
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                if (repo.homepage.isNotEmpty) ...[
+                  SizedBox(height: 6.h),
+                  Text(
+                    'Homepage: ${repo.homepage}',
+                    style: TextStyle(fontSize: 13.sp),
+                  ),
+                ],
+                SizedBox(height: 18.h),
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 250),
                   padding: EdgeInsets.symmetric(
@@ -114,20 +157,77 @@ class RepositoryDetailsPage extends GetView<RepositoryDetailsController> {
                   ),
                 ),
                 SizedBox(height: 16.h),
-                Row(
-                  children: [
-                    Icon(Icons.star, color: Colors.amber.shade700, size: 18.sp),
-                    SizedBox(width: 6.w),
-                    Text(
-                      '${repo.stargazersCount} stars',
-                      style: TextStyle(fontSize: 14.sp),
+                if (repo.topics.isNotEmpty) ...[
+                  Text(
+                    'Topics',
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w700,
                     ),
-                  ],
-                ),
+                  ),
+                  SizedBox(height: 8.h),
+                  Wrap(
+                    spacing: 8.w,
+                    runSpacing: 8.h,
+                    children: repo.topics
+                        .map(
+                          (t) => Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 10.w,
+                              vertical: 6.h,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.primaryContainer,
+                              borderRadius: BorderRadius.circular(12.r),
+                            ),
+                            child: Text(t, style: TextStyle(fontSize: 12.sp)),
+                          ),
+                        )
+                        .toList(),
+                  ),
+                ],
               ],
             ),
           );
         }),
+      ),
+    );
+  }
+}
+
+class _InfoChip extends StatelessWidget {
+  const _InfoChip({
+    required this.icon,
+    required this.label,
+    required this.color,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+      decoration: BoxDecoration(
+        color: color.withValues(
+          alpha: 0.12,
+          red: null,
+          green: null,
+          blue: null,
+        ),
+        borderRadius: BorderRadius.circular(12.r),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16.sp, color: color),
+          SizedBox(width: 6.w),
+          Text(label, style: TextStyle(fontSize: 12.sp)),
+        ],
       ),
     );
   }

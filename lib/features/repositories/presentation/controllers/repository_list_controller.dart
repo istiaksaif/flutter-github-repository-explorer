@@ -44,7 +44,7 @@ class RepositoryListController extends GetxController {
     loadRepositories();
   }
 
-  Future<void> loadRepositories() async {
+  Future<void> loadRepositories({bool forceRefresh = false}) async {
     isLoading.value = true;
     _currentVisible = 0;
     visibleRepositories.clear();
@@ -56,7 +56,10 @@ class RepositoryListController extends GetxController {
     offlineMode.value = !connected;
 
     try {
-      final result = await getRepositoriesUseCase(currentPreference);
+      final result = await getRepositoriesUseCase(
+        currentPreference,
+        forceRefresh: forceRefresh,
+      );
       repositories.assignAll(result);
       _appendPage();
     } catch (e) {

@@ -98,7 +98,7 @@ class RepositoryListPage extends GetView<RepositoryListController> {
           }
 
           return RefreshIndicator(
-            onRefresh: controller.loadRepositories,
+            onRefresh: () => controller.loadRepositories(forceRefresh: true),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
