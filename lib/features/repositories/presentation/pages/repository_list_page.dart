@@ -69,11 +69,6 @@ class RepositoryListPage extends GetView<RepositoryListController> {
             icon: const Icon(Icons.tune),
             onPressed: () => _openMenu(context),
           ),
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: controller.loadRepositories,
-          ),
-          SizedBox(width: 6.w),
         ],
       ),
       body: Padding(
@@ -102,57 +97,60 @@ class RepositoryListPage extends GetView<RepositoryListController> {
             );
           }
 
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 250),
-                child: controller.offlineMode.value
-                    ? Container(
-                        key: const ValueKey('offline_banner'),
-                        width: double.infinity,
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 12.w,
-                          vertical: 10.h,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.amber.shade100,
-                          borderRadius: BorderRadius.circular(12.r),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.wifi_off),
-                            SizedBox(width: 8.w),
-                            Expanded(
-                              child: Text(
-                                'Offline mode: showing cached repositories',
-                                style: TextStyle(fontSize: 13.sp),
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    : const SizedBox.shrink(),
-              ),
-              Expanded(
-                child: AnimatedSwitcher(
+          return RefreshIndicator(
+            onRefresh: controller.loadRepositories,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AnimatedSwitcher(
                   duration: const Duration(milliseconds: 250),
-                  child: ListView.separated(
-                    key: ValueKey(
-                      '${controller.sortPreference.value.field}_${controller.sortPreference.value.order}_${controller.repositories.length}',
+                  child: controller.offlineMode.value
+                      ? Container(
+                          key: const ValueKey('offline_banner'),
+                          width: double.infinity,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 12.w,
+                            vertical: 10.h,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.amber.shade100,
+                            borderRadius: BorderRadius.circular(12.r),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.wifi_off),
+                              SizedBox(width: 8.w),
+                              Expanded(
+                                child: Text(
+                                  'Offline mode: showing cached repositories',
+                                  style: TextStyle(fontSize: 13.sp),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : const SizedBox.shrink(),
+                ),
+                Expanded(
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 250),
+                    child: ListView.separated(
+                      key: ValueKey(
+                        '${controller.sortPreference.value.field}_${controller.sortPreference.value.order}_${controller.repositories.length}',
+                      ),
+                      itemCount: controller.visibleRepositories.length,
+                      separatorBuilder: (context, index) =>
+                          SizedBox(height: 10.h),
+                      itemBuilder: (context, index) {
+                        controller.loadMoreIfNeeded(index);
+                        final repo = controller.visibleRepositories[index];
+                        return RepositoryTile(repository: repo);
+                      },
                     ),
-                    itemCount: controller.visibleRepositories.length,
-                    separatorBuilder: (context, index) =>
-                        SizedBox(height: 10.h),
-                    itemBuilder: (context, index) {
-                      controller.loadMoreIfNeeded(index);
-                      final repo = controller.visibleRepositories[index];
-                      return RepositoryTile(repository: repo);
-                    },
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           );
         }),
       ),
