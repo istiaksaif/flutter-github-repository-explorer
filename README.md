@@ -1,21 +1,23 @@
 # Flutter GitHub Repository Explorer
 
-Feature-first Clean Architecture Flutter app that searches GitHub for the top starred **Flutter** repositories, supports offline browsing with SQLite cache, and persists sorting preferences with GetStorage.
+Feature-first Clean Architecture Flutter app that searches GitHub for the top starred **Flutter** repositories, supports offline browsing with SQLite cache, and persists sorting preferences with GetStorage. Built with GetX, ScreenUtil, SQLite, and GitHub Search API.
 
 ## Highlights
-- Fetch top 50 GitHub repos (query: Flutter) sorted by stars; falls back to SQLite cache when offline.
-- Sort by stars or last updated, ascending/descending; preference restored on relaunch.
-- GetX for state management, DI, routing; ScreenUtil for responsive sizing.
-- Cached owner avatars via `cached_network_image` + custom cache manager.
-- Pure Dart domain layer (no Flutter imports) following Clean Architecture.
+- Fetch top 50 GitHub repos (query: Flutter) sorted by stars; caches into SQLite and auto-falls back offline.
+- Sort by stars or last updated, ascending/descending; preference persisted in GetStorage and restored on launch.
+- GetX for state, DI, routing; ScreenUtil for responsive sizing; pull-to-refresh + infinite scroll pagination.
+- Cached owner avatars with `cached_network_image` + custom cache manager.
+- Light/dark themes with custom palette and typography; UI-safe text scaling locked at 1.0.
+- Pure Dart domain layer (no Flutter imports) with feature-first Clean Architecture.
 
 ## Tech Stack
 - Flutter 3.38+, Dart 3.10+
-- GetX, flutter_screenutil, http
+- GetX (state/DI/routing), flutter_screenutil
+- http + custom ApiClient, compute() JSON parsing
 - sqflite + path_provider (offline cache)
 - get_storage (preferences)
 - cached_network_image + flutter_cache_manager
-- connectivity_plus, intl
+- skeletonizer (loading skeletons), connectivity_plus, intl
 
 ## Structure (feature-first)
 ```
@@ -30,20 +32,21 @@ lib/
 ## Key Paths
 - Routing: `lib/routes/app_routes.dart`, `lib/routes/app_pages.dart`
 - Database: `lib/core/database/app_database.dart`
-- Network info: `lib/core/network/network_info.dart`
-- Repository feature entry: `lib/features/repositories/presentation/pages/repository_list_page.dart`
-- Details page: `lib/features/repositories/presentation/pages/repository_details_page.dart`
+- Network: `lib/core/network/network_info.dart`, `lib/core/services/api_client.dart`
+- Theme: `lib/core/utils/app_colors.dart`, `lib/core/utils/app_fonts.dart`
+- Feature entry: `lib/features/repositories/presentation/pages/repository_list_page.dart`
+- Details: `lib/features/repositories/presentation/pages/repository_details_page.dart`
 - Controllers: `lib/features/repositories/presentation/controllers/`
 - Cache manager: `lib/core/utils/custom_cache_manager.dart`
 - Image loader: `lib/core/widgets/image_loader.dart`
-- App bar: `lib/core/widgets/custom_app_bar.dart`
 
 ## Data Flow
-1) `GithubRemoteDataSource` hits `https://api.github.com/search/repositories?q=Flutter&sort=stars&order=desc&per_page=50`.
-2) `GithubRepositoryImpl` caches results into SQLite via `GithubLocalDataSource`.
+1) `GithubRemoteDataSource` -> GitHub Search API (`Flutter`, stars desc, per_page=50) via `ApiClient`.
+2) `GithubRepositoryImpl` caches into SQLite via `GithubLocalDataSource`.
 3) Offline/failed fetch falls back to cached rows.
-4) Sorting is applied in `GetRepositoriesUseCase` and saved/loaded with `SortPreferenceRepository` (GetStorage).
+4) Sorting is applied in `GetRepositoriesUseCase`, saved/loaded with `SortPreferenceRepository` (GetStorage).
 5) UI consumes GetX controllers; navigation via named routes only.
+6) Pagination: controllers maintain visible list and load more on scroll end; pull-to-refresh reloads from API/cache.
 
 ## Running
 - Install Flutter, then:
@@ -57,4 +60,5 @@ lib/
 ## Notes
 - Responsive sizing uses `.w`, `.h`, `.sp` via ScreenUtil (`designSize` 375x812).
 - Text scaling clamped to 1.0 in `main.dart` for consistent layout.
-- Offline banner appears when no connectivity is detected.```
+- Offline banner appears when no connectivity is detected.
+- Loading states use skeleton cards aligned to live card layout; avatars are cached; hero animations between list/detail.```
