@@ -38,57 +38,94 @@ class RepositoryDetailsPage extends GetView<RepositoryDetailsController> {
               ),
             );
           }
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  ImageLoader(
-                    url: repo.ownerAvatarUrl,
-                    size: 56.w,
-                    shape: BoxShape.circle,
-                  ),
-                  SizedBox(width: 12.w),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          repo.ownerName,
-                          style: TextStyle(
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w700,
+          return SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Hero(
+                      tag: 'repo_avatar_${repo.id}',
+                      child: ImageLoader(
+                        url: repo.ownerAvatarUrl,
+                        size: 64.w,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    SizedBox(width: 12.w),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            repo.ownerName,
+                            style: TextStyle(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
-                        ),
-                        SizedBox(height: 4.h),
-                        Text(
-                          DateFormatter.formatDetail(repo.updatedAt),
-                          style: TextStyle(fontSize: 13.sp),
-                        ),
-                      ],
+                          SizedBox(height: 4.h),
+                          Text(
+                            DateFormatter.formatDetail(repo.updatedAt),
+                            style: TextStyle(fontSize: 13.sp),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 18.h),
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 250),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 14.w,
+                    vertical: 14.h,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surfaceContainerLowest,
+                    borderRadius: BorderRadius.circular(14.r),
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.primary.withValues(
+                        alpha: 0.2,
+                        red: null,
+                        green: null,
+                        blue: null,
+                      ),
                     ),
                   ),
-                ],
-              ),
-              SizedBox(height: 16.h),
-              Text(
-                repo.description.isNotEmpty
-                    ? repo.description
-                    : 'No description provided.',
-                style: TextStyle(fontSize: 14.sp),
-              ),
-              SizedBox(height: 16.h),
-              Row(
-                children: [
-                  Icon(Icons.star, color: Colors.amber.shade700, size: 18.sp),
-                  SizedBox(width: 6.w),
-                  Text(
-                    '${repo.stargazersCount} stars',
-                    style: TextStyle(fontSize: 14.sp),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Description',
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      SizedBox(height: 8.h),
+                      Text(
+                        repo.description.isNotEmpty
+                            ? repo.description
+                            : 'No description provided.',
+                        style: TextStyle(fontSize: 14.sp),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ],
+                ),
+                SizedBox(height: 16.h),
+                Row(
+                  children: [
+                    Icon(Icons.star, color: Colors.amber.shade700, size: 18.sp),
+                    SizedBox(width: 6.w),
+                    Text(
+                      '${repo.stargazersCount} stars',
+                      style: TextStyle(fontSize: 14.sp),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           );
         }),
       ),

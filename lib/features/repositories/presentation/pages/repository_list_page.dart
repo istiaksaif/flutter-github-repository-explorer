@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import '../../domain/entities/sort_option.dart';
 import '../../../../core/widgets/custom_app_bar.dart';
+import '../../../../core/widgets/shimmer_list.dart';
 import '../controllers/repository_list_controller.dart';
 import '../widgets/repository_tile.dart';
 
@@ -27,7 +28,7 @@ class RepositoryListPage extends GetView<RepositoryListController> {
         padding: EdgeInsets.all(16.w),
         child: Obx(() {
           if (controller.isLoading.value) {
-            return const Center(child: CircularProgressIndicator());
+            return const ShimmerList(itemCount: 6);
           }
 
           if (controller.errorMessage.value.isNotEmpty) {
@@ -52,30 +53,35 @@ class RepositoryListPage extends GetView<RepositoryListController> {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (controller.offlineMode.value)
-                Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 12.w,
-                    vertical: 10.h,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.amber.shade100,
-                    borderRadius: BorderRadius.circular(12.r),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.wifi_off),
-                      SizedBox(width: 8.w),
-                      Expanded(
-                        child: Text(
-                          'Offline mode: showing cached repositories',
-                          style: TextStyle(fontSize: 13.sp),
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 250),
+                child: controller.offlineMode.value
+                    ? Container(
+                        key: const ValueKey('offline_banner'),
+                        width: double.infinity,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 12.w,
+                          vertical: 10.h,
                         ),
-                      ),
-                    ],
-                  ),
-                ),
+                        decoration: BoxDecoration(
+                          color: Colors.amber.shade100,
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.wifi_off),
+                            SizedBox(width: 8.w),
+                            Expanded(
+                              child: Text(
+                                'Offline mode: showing cached repositories',
+                                style: TextStyle(fontSize: 13.sp),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : const SizedBox.shrink(),
+              ),
               SizedBox(height: 12.h),
               Row(
                 children: [
@@ -120,13 +126,21 @@ class RepositoryListPage extends GetView<RepositoryListController> {
               ),
               SizedBox(height: 12.h),
               Expanded(
-                child: ListView.separated(
-                  itemCount: controller.repositories.length,
-                  separatorBuilder: (context, index) => SizedBox(height: 10.h),
-                  itemBuilder: (context, index) {
-                    final repo = controller.repositories[index];
-                    return RepositoryTile(repository: repo);
-                  },
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 250),
+                  child: ListView.separated(
+                    key: ValueKey(
+                      '${controller.sortPreference.value.field}_${controller.sortPreference.value.order}_${controller.repositories.length}',
+                    ),
+                    itemCount: controller.visibleRepositories.length,
+                    separatorBuilder: (context, index) =>
+                        SizedBox(height: 10.h),
+                    itemBuilder: (context, index) {
+                      controller.loadMoreIfNeeded(index);
+                      final repo = controller.visibleRepositories[index];
+                      return RepositoryTile(repository: repo);
+                    },
+                  ),
                 ),
               ),
             ],

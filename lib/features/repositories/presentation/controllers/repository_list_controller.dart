@@ -22,6 +22,7 @@ class RepositoryListController extends GetxController {
   final NetworkInfo networkInfo;
 
   final repositories = <RepositoryEntity>[].obs;
+  final visibleRepositories = <RepositoryEntity>[].obs;
   final isLoading = false.obs;
   final errorMessage = ''.obs;
   final offlineMode = false.obs;
@@ -29,6 +30,10 @@ class RepositoryListController extends GetxController {
     field: SortField.stars,
     order: SortOrder.descending,
   ).obs;
+  final isPaginating = false.obs;
+
+  static const int _pageSize = 20;
+  int _currentVisible = 0;
 
   @override
   void onInit() {
@@ -38,6 +43,8 @@ class RepositoryListController extends GetxController {
 
   Future<void> loadRepositories() async {
     isLoading.value = true;
+    _currentVisible = 0;
+    visibleRepositories.clear();
     errorMessage.value = '';
     final currentPreference = await loadSortPreferenceUseCase();
     sortPreference.value = currentPreference;
@@ -48,6 +55,7 @@ class RepositoryListController extends GetxController {
     try {
       final result = await getRepositoriesUseCase(currentPreference);
       repositories.assignAll(result);
+      _appendPage();
     } catch (e) {
       final message = e is AppFailure ? e.message : 'Something went wrong';
       errorMessage.value = message;
@@ -79,5 +87,31 @@ class RepositoryListController extends GetxController {
       return preference.order == SortOrder.ascending ? comparison : -comparison;
     });
     repositories.assignAll(updated);
+    _resetPagination();
+  }
+
+  void _resetPagination() {
+    _currentVisible = 0;
+    visibleRepositories.clear();
+    _appendPage();
+  }
+
+  void _appendPage() {
+    final start = _currentVisible;
+    final end = (_currentVisible + _pageSize).clamp(0, repositories.length);
+    if (start >= end) return;
+    visibleRepositories.addAll(repositories.sublist(start, end));
+    _currentVisible = end;
+  }
+
+  void loadMoreIfNeeded(int index) {
+    final threshold = visibleRepositories.length - 5;
+    if (!isPaginating.value &&
+        index >= threshold &&
+        visibleRepositories.length < repositories.length) {
+      isPaginating.value = true;
+      _appendPage();
+      isPaginating.value = false;
+    }
   }
 }
