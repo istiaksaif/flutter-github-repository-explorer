@@ -7,7 +7,7 @@ import '../../../../../core/constants/api_constants.dart';
 import '../../../../../core/services/api_client.dart';
 
 abstract class GithubRemoteDataSource {
-  Future<List<RepositoryModel>> fetchRepositories();
+  Future<List<RepositoryModel>> fetchRepositories({int page = 1});
 }
 
 class GithubRemoteDataSourceImpl implements GithubRemoteDataSource {
@@ -16,7 +16,7 @@ class GithubRemoteDataSourceImpl implements GithubRemoteDataSource {
   final ApiClient apiClient;
 
   @override
-  Future<List<RepositoryModel>> fetchRepositories() async {
+  Future<List<RepositoryModel>> fetchRepositories({int page = 1}) async {
     final response = await apiClient.getData(
       path: ApiConstants.searchRepositories,
       queryParameters: {
@@ -24,6 +24,7 @@ class GithubRemoteDataSourceImpl implements GithubRemoteDataSource {
         'sort': 'stars',
         'order': 'desc',
         'per_page': ApiConstants.maxItems.toString(),
+        'page': page.toString(),
       },
     );
 

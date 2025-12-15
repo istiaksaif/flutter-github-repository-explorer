@@ -10,9 +10,11 @@ class GetRepositoriesUseCase {
   Future<List<RepositoryEntity>> call(
     SortPreference preference, {
     bool forceRefresh = false,
+    int page = 1,
   }) async {
     final repos = await repository.fetchRepositories(
       forceRefresh: forceRefresh,
+      page: page,
     );
     repos.sort((a, b) {
       int comparison;

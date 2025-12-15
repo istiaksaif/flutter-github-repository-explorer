@@ -25,6 +25,7 @@ class GithubRepositoryImpl implements GithubRepository {
   @override
   Future<List<RepositoryEntity>> fetchRepositories({
     bool forceRefresh = false,
+    int page = 1,
   }) async {
     final connected = await networkInfo.isConnected;
 
@@ -39,7 +40,7 @@ class GithubRepositoryImpl implements GithubRepository {
 
     if (connected && (forceRefresh || isStale || cached.isEmpty)) {
       try {
-        final remoteRepos = await remoteDataSource.fetchRepositories();
+        final remoteRepos = await remoteDataSource.fetchRepositories(page: page);
         await localDataSource.cacheRepositories(remoteRepos);
         await storage.write(
           StorageKeys.lastSync,
