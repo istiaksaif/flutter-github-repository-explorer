@@ -30,34 +30,25 @@ class RepositoryListPage extends GetView<RepositoryListController> {
         _buildMenuItem(
           label: 'Sort by Stars',
           selected: preference.field == SortField.stars,
-          onTap: () => controller.updateSort(
-            SortField.stars,
-            preference.order,
-          ),
+          onTap: () => controller.updateSort(SortField.stars, preference.order),
         ),
         _buildMenuItem(
           label: 'Sort by Updated',
           selected: preference.field == SortField.updatedAt,
-          onTap: () => controller.updateSort(
-            SortField.updatedAt,
-            preference.order,
-          ),
+          onTap: () =>
+              controller.updateSort(SortField.updatedAt, preference.order),
         ),
         _buildMenuItem(
           label: 'Order Asc',
           selected: preference.order == SortOrder.ascending,
-          onTap: () => controller.updateSort(
-            preference.field,
-            SortOrder.ascending,
-          ),
+          onTap: () =>
+              controller.updateSort(preference.field, SortOrder.ascending),
         ),
         _buildMenuItem(
           label: 'Order Desc',
           selected: preference.order == SortOrder.descending,
-          onTap: () => controller.updateSort(
-            preference.field,
-            SortOrder.descending,
-          ),
+          onTap: () =>
+              controller.updateSort(preference.field, SortOrder.descending),
         ),
       ],
     );
@@ -169,7 +160,8 @@ class RepositoryListPage extends GetView<RepositoryListController> {
                     duration: const Duration(milliseconds: 250),
                     child: Obx(() {
                       final showLoader = controller.isPaginating.value;
-                      final itemCount = controller.visibleRepositories.length +
+                      final itemCount =
+                          controller.visibleRepositories.length +
                           (showLoader ? 1 : 0);
                       return ListView.separated(
                         controller: controller.scrollController,
@@ -186,7 +178,13 @@ class RepositoryListPage extends GetView<RepositoryListController> {
                             return Padding(
                               padding: EdgeInsets.symmetric(vertical: 12.h),
                               child: const Center(
-                                child: CircularProgressIndicator(strokeWidth: 2),
+                                child: SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                ),
                               ),
                             );
                           }
