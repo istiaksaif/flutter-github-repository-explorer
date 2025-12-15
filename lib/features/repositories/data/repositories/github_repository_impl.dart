@@ -9,6 +9,8 @@ import '../datasources/remote/github_remote_data_source.dart';
 import '../../../../../core/constants/storage_keys.dart';
 import 'package:get_storage/get_storage.dart';
 
+import '../models/repository_model.dart';
+
 class GithubRepositoryImpl implements GithubRepository {
   GithubRepositoryImpl({
     required this.remoteDataSource,
