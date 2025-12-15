@@ -153,7 +153,6 @@ class RepositoryListController extends GetxController {
   }
 
   void _handleScroll() {
-    debugPrint('Scroll event: ${scrollController.position.pixels}');
     if (!scrollController.hasClients || isPaginating.value) return;
     final position = scrollController.position;
     if (position.pixels >= position.maxScrollExtent - 200) {
