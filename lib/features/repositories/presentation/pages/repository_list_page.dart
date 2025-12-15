@@ -14,6 +14,7 @@ class RepositoryListPage extends GetView<RepositoryListController> {
   final GlobalKey _menuKey = GlobalKey();
 
   void _openMenu(BuildContext context) {
+    final preference = controller.sortPreference.value;
     final renderBox = _menuKey.currentContext?.findRenderObject() as RenderBox?;
     final offset = renderBox?.localToGlobal(Offset.zero) ?? Offset.zero;
     final size = renderBox?.size ?? Size.zero;
@@ -26,35 +27,67 @@ class RepositoryListPage extends GetView<RepositoryListController> {
         0,
       ),
       items: [
-        PopupMenuItem(
-          child: const Text('Sort by Stars'),
+        _buildMenuItem(
+          label: 'Sort by Stars',
+          selected: preference.field == SortField.stars,
           onTap: () => controller.updateSort(
             SortField.stars,
-            controller.sortPreference.value.order,
+            preference.order,
           ),
         ),
-        PopupMenuItem(
-          child: const Text('Sort by Updated'),
+        _buildMenuItem(
+          label: 'Sort by Updated',
+          selected: preference.field == SortField.updatedAt,
           onTap: () => controller.updateSort(
             SortField.updatedAt,
-            controller.sortPreference.value.order,
+            preference.order,
           ),
         ),
-        PopupMenuItem(
-          child: const Text('Order Asc'),
+        _buildMenuItem(
+          label: 'Order Asc',
+          selected: preference.order == SortOrder.ascending,
           onTap: () => controller.updateSort(
-            controller.sortPreference.value.field,
+            preference.field,
             SortOrder.ascending,
           ),
         ),
-        PopupMenuItem(
-          child: const Text('Order Desc'),
+        _buildMenuItem(
+          label: 'Order Desc',
+          selected: preference.order == SortOrder.descending,
           onTap: () => controller.updateSort(
-            controller.sortPreference.value.field,
+            preference.field,
             SortOrder.descending,
           ),
         ),
       ],
+    );
+  }
+
+  PopupMenuItem<void> _buildMenuItem({
+    required String label,
+    required bool selected,
+    required VoidCallback onTap,
+  }) {
+    return PopupMenuItem<void>(
+      onTap: onTap,
+      child: Row(
+        children: [
+          SizedBox(
+            width: 18.sp,
+            child: AnimatedOpacity(
+              duration: const Duration(milliseconds: 150),
+              opacity: selected ? 1 : 0,
+              child: Icon(
+                Icons.check,
+                size: 18.sp,
+                color: Get.theme.colorScheme.primary,
+              ),
+            ),
+          ),
+          SizedBox(width: 8.w),
+          Text(label, style: TextStyle(fontSize: 14.sp)),
+        ],
+      ),
     );
   }
 

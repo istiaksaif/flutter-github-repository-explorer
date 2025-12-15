@@ -76,6 +76,28 @@ class RepositoryDetailsPage extends GetView<RepositoryDetailsController> {
                 ),
                 SizedBox(height: 18.h),
                 Wrap(
+                  spacing: 10.w,
+                  runSpacing: 8.h,
+                  children: [
+                    _ActionButton(
+                      icon: Icons.link,
+                      label: 'Copy URL',
+                      onPressed: controller.copyRepositoryUrl,
+                    ),
+                    _ActionButton(
+                      icon: Icons.call_split,
+                      label: 'Fork',
+                      onPressed: controller.openForkPage,
+                    ),
+                    _ActionButton(
+                      icon: Icons.download_rounded,
+                      label: 'Download',
+                      onPressed: controller.downloadRepositoryArchive,
+                    ),
+                  ],
+                ),
+                SizedBox(height: 12.h),
+                Wrap(
                   spacing: 8.w,
                   runSpacing: 8.h,
                   children: [
@@ -192,6 +214,36 @@ class RepositoryDetailsPage extends GetView<RepositoryDetailsController> {
             ),
           );
         }),
+      ),
+    );
+  }
+}
+
+class _ActionButton extends StatelessWidget {
+  const _ActionButton({
+    required this.icon,
+    required this.label,
+    required this.onPressed,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 40.h,
+      child: OutlinedButton.icon(
+        style: OutlinedButton.styleFrom(
+          padding: EdgeInsets.symmetric(horizontal: 12.w),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.r),
+          ),
+        ),
+        onPressed: onPressed,
+        icon: Icon(icon, size: 18.sp),
+        label: Text(label, style: TextStyle(fontSize: 13.sp)),
       ),
     );
   }
