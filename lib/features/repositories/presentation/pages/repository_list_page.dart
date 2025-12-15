@@ -167,19 +167,34 @@ class RepositoryListPage extends GetView<RepositoryListController> {
                 Expanded(
                   child: AnimatedSwitcher(
                     duration: const Duration(milliseconds: 250),
-                    child: ListView.separated(
-                      controller: controller.scrollController,
-                      key: ValueKey(
-                        '${controller.sortPreference.value.field}_${controller.sortPreference.value.order}_${controller.repositories.length}',
-                      ),
-                      itemCount: controller.visibleRepositories.length,
-                      separatorBuilder: (context, index) =>
-                          SizedBox(height: 10.h),
-                      itemBuilder: (context, index) {
-                        final repo = controller.visibleRepositories[index];
-                        return RepositoryTile(repository: repo);
-                      },
-                    ),
+                    child: Obx(() {
+                      final showLoader = controller.isPaginating.value;
+                      final itemCount = controller.visibleRepositories.length +
+                          (showLoader ? 1 : 0);
+                      return ListView.separated(
+                        controller: controller.scrollController,
+                        key: ValueKey(
+                          '${controller.sortPreference.value.field}_${controller.sortPreference.value.order}_${controller.repositories.length}',
+                        ),
+                        itemCount: itemCount,
+                        separatorBuilder: (context, index) =>
+                            SizedBox(height: 10.h),
+                        itemBuilder: (context, index) {
+                          final isLoaderRow =
+                              showLoader && index == itemCount - 1;
+                          if (isLoaderRow) {
+                            return Padding(
+                              padding: EdgeInsets.symmetric(vertical: 12.h),
+                              child: const Center(
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              ),
+                            );
+                          }
+                          final repo = controller.visibleRepositories[index];
+                          return RepositoryTile(repository: repo);
+                        },
+                      );
+                    }),
                   ),
                 ),
               ],

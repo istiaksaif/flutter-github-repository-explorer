@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -110,19 +111,26 @@ class RepositoryListController extends GetxController {
     _currentVisible = end;
   }
 
-  void loadMoreIfNeeded(int index) {
+  Future<void> loadMoreIfNeeded(int index) async {
     final threshold = visibleRepositories.length - 5;
-    if (!isPaginating.value &&
-        index >= threshold &&
-        visibleRepositories.length < repositories.length) {
-      isPaginating.value = true;
-      _appendPage();
+    final shouldLoadMore = index >= threshold &&
+        visibleRepositories.length < repositories.length &&
+        !isPaginating.value;
+    if (!shouldLoadMore) return;
+
+    isPaginating.value = true;
+    try {
+      await Future<void>.microtask(_appendPage);
+      // Small delay so the loader is visible while items are appended.
+      await Future<void>.delayed(const Duration(milliseconds: 120));
+    } finally {
       isPaginating.value = false;
     }
   }
 
   void _handleScroll() {
-    if (!scrollController.hasClients) return;
+    debugPrint('Scroll event: ${scrollController.position.pixels}');
+    if (!scrollController.hasClients || isPaginating.value) return;
     final position = scrollController.position;
     if (position.pixels >= position.maxScrollExtent - 200) {
       loadMoreIfNeeded(visibleRepositories.length);
