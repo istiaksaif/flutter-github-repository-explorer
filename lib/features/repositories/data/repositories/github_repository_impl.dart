@@ -43,7 +43,8 @@ class GithubRepositoryImpl implements GithubRepository {
 
     if (connected && shouldHitRemote) {
       try {
-        final remoteRepos = await remoteDataSource.fetchRepositories(page: page);
+        final remoteRepos =
+            await remoteDataSource.fetchRepositories(page: page);
         final merged = _mergeRepositories(cached, remoteRepos, page);
         await localDataSource.cacheRepositories(merged);
         await storage.write(
@@ -70,9 +71,9 @@ class GithubRepositoryImpl implements GithubRepository {
   }
 }
 
-List<RepositoryEntity> _mergeRepositories(
-  List<RepositoryEntity> existing,
-  List<RepositoryEntity> incoming,
+List<RepositoryModel> _mergeRepositories(
+  List<RepositoryModel> existing,
+  List<RepositoryModel> incoming,
   int page,
 ) {
   if (page <= 1 || existing.isEmpty) return incoming;
