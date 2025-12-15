@@ -38,15 +38,19 @@ class GithubRepositoryImpl implements GithubRepository {
         lastSync == null ||
         DateTime.now().difference(lastSync) > const Duration(hours: 24);
 
-    if (connected && (forceRefresh || isStale || cached.isEmpty)) {
+    final shouldHitRemote =
+        forceRefresh || isStale || cached.isEmpty || page > 1;
+
+    if (connected && shouldHitRemote) {
       try {
         final remoteRepos = await remoteDataSource.fetchRepositories(page: page);
-        await localDataSource.cacheRepositories(remoteRepos);
+        final merged = _mergeRepositories(cached, remoteRepos, page);
+        await localDataSource.cacheRepositories(merged);
         await storage.write(
           StorageKeys.lastSync,
           DateTime.now().toIso8601String(),
         );
-        return remoteRepos;
+        return merged;
       } catch (e, s) {
         log('Remote fetch failed, falling back to cache: $e', stackTrace: s);
       }
@@ -64,4 +68,20 @@ class GithubRepositoryImpl implements GithubRepository {
   Future<RepositoryEntity?> getRepositoryById(int id) {
     return localDataSource.getRepositoryById(id);
   }
+}
+
+List<RepositoryEntity> _mergeRepositories(
+  List<RepositoryEntity> existing,
+  List<RepositoryEntity> incoming,
+  int page,
+) {
+  if (page <= 1 || existing.isEmpty) return incoming;
+  final ids = existing.map((e) => e.id).toSet();
+  final combined = [...existing];
+  for (final repo in incoming) {
+    if (ids.add(repo.id)) {
+      combined.add(repo);
+    }
+  }
+  return combined;
 }

@@ -37,6 +37,7 @@ class RepositoryListController extends GetxController {
 
   static const int _pageSize = 20;
   int _currentVisible = 0;
+  int _currentApiPage = 1;
 
   @override
   void onInit() {
@@ -45,11 +46,23 @@ class RepositoryListController extends GetxController {
     loadRepositories();
   }
 
-  Future<void> loadRepositories({bool forceRefresh = false}) async {
-    isLoading.value = true;
-    _currentVisible = 0;
-    visibleRepositories.clear();
-    errorMessage.value = '';
+  Future<void> loadRepositories({
+    bool forceRefresh = false,
+    bool loadNextPage = false,
+  }) async {
+    final isInitialLoad = !loadNextPage;
+
+    if (isInitialLoad) {
+      isLoading.value = true;
+      _currentApiPage = 1;
+      _currentVisible = 0;
+      visibleRepositories.clear();
+      errorMessage.value = '';
+    } else {
+      isPaginating.value = true;
+    }
+
+    final targetPage = loadNextPage ? _currentApiPage + 1 : 1;
     final currentPreference = await loadSortPreferenceUseCase();
     sortPreference.value = currentPreference;
 
@@ -59,16 +72,25 @@ class RepositoryListController extends GetxController {
     try {
       final result = await getRepositoriesUseCase(
         currentPreference,
-        forceRefresh: forceRefresh,
+        forceRefresh: forceRefresh || loadNextPage,
+        page: targetPage,
       );
       repositories.assignAll(result);
+      _currentApiPage = targetPage;
       _appendPage();
+      if (!isInitialLoad) {
+        await Future<void>.delayed(const Duration(milliseconds: 120));
+      }
     } catch (e) {
       final message = e is AppFailure ? e.message : 'Something went wrong';
       errorMessage.value = message;
       Get.snackbar('Error', message);
     } finally {
-      isLoading.value = false;
+      if (isInitialLoad) {
+        isLoading.value = false;
+      } else {
+        isPaginating.value = false;
+      }
     }
   }
 
@@ -113,19 +135,21 @@ class RepositoryListController extends GetxController {
 
   Future<void> loadMoreIfNeeded(int index) async {
     final threshold = visibleRepositories.length - 5;
-    final shouldLoadMore = index >= threshold &&
-        visibleRepositories.length < repositories.length &&
-        !isPaginating.value;
-    if (!shouldLoadMore) return;
+    final closeToEnd = index >= threshold;
+    if (!closeToEnd || isPaginating.value) return;
 
-    isPaginating.value = true;
-    try {
-      await Future<void>.microtask(_appendPage);
-      // Small delay so the loader is visible while items are appended.
-      await Future<void>.delayed(const Duration(milliseconds: 120));
-    } finally {
-      isPaginating.value = false;
+    if (visibleRepositories.length < repositories.length) {
+      isPaginating.value = true;
+      try {
+        await Future<void>.microtask(_appendPage);
+        await Future<void>.delayed(const Duration(milliseconds: 120));
+      } finally {
+        isPaginating.value = false;
+      }
+      return;
     }
+
+    await loadRepositories(loadNextPage: true);
   }
 
   void _handleScroll() {
